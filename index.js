@@ -1,10 +1,24 @@
 import { app } from "./src/app.js";
 import connectDB from "./src/config/db.js";
 
-connectDB();
+let isConnected = false;
 
-const PORT = process.env.PORT || 3000;
+async function handler(req, res) {
+  try {
+    if (!isConnected) {
+      await connectDB();
+      isConnected = true;
+    }
 
-app.listen(PORT, () => {
-  console.log(`Server running at ${PORT}`);
-});
+    return app(req, res);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
+export default handler;
