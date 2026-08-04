@@ -20,10 +20,6 @@ app.use(
   }),
 );
 
-app.options("*", cors());
-
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use("/api", routerIndex);
 
 // Health check
