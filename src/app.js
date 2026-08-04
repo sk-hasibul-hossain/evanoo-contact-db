@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://evanoo-contact-db.vercel.app",
+    origin: "*",
   }),
 );
 
