@@ -4,7 +4,6 @@ import {
   deleteContactService,
 } from "../services/contact.service.js";
 export const createContact = async (req, res) => {
-  console.log(req.body);
   try {
     const contact = await Contact.create(req.body);
 
