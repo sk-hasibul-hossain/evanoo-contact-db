@@ -21,7 +21,7 @@ const app = express();
 // );
 app.use(
   cors({
-    origin: true,
+    origin: /^http:\/\/localhost:\d+$/, // 👈 Put your exact React URL here (DO NOT USE '*')
     credentials: true,
   }),
 );
