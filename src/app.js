@@ -20,9 +20,20 @@ const app = express();
 //     credentials: true,
 //   }),
 // );
+const allowedOrigins = [
+  "https://contacts-admin.evanoo.in",
+  "https://evanoo.in",
+];
+
 app.use(
   cors({
-    origin: "https://contacts-admin.evanoo.in", // 👈 Put your exact React URL here (DO NOT USE '*')
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
