@@ -14,17 +14,17 @@ env.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
 // app.use(
 //   cors({
-//     origin: "http://localhost:5173", // 👈 Put your exact React URL here (DO NOT USE '*')
-//     credentials: true,
+//     origin: "*",
 //   }),
 // );
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
