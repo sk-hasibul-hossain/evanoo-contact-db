@@ -5,8 +5,9 @@ export const loginController = async (req, res) => {
     const result = await loginService(req.body);
     res.cookie("token", result.token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
+      secure: true,
+      // sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
