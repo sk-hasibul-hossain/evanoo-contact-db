@@ -22,7 +22,11 @@ const app = express();
 // );
 app.use(
   cors({
-    origin: ["https://contacts-admin.evanoo.in", "https://evanoo.in"], // 👈 Put your exact React URL here (DO NOT USE '*')
+    origin: [
+      "https://contacts-admin.evanoo.in",
+      "https://evanoo.in",
+      "http://localhost:5174",
+    ], // 👈 Put your exact React URL here (DO NOT USE '*')
     credentials: true,
   }),
 );
