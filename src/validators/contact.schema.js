@@ -12,6 +12,12 @@ export const createContactUsSchema = z.object({
     required_error: "Email is required",
   }),
 
+  phone: z
+    .string({
+      required_error: "Phone number is required",
+    })
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+
   subject: z.string().trim().optional(),
 
   message: z

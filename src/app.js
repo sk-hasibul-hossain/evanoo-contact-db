@@ -4,6 +4,7 @@ import env from "dotenv";
 // import swaggerUi from "swagger-ui-express";
 // import swaggerSpec from "./config/swagger.js";
 import routerIndex from "./routers/index.js";
+import cookieParser from "cookie-parser";
 
 import dns from "node:dns";
 
@@ -13,13 +14,22 @@ env.config();
 
 const app = express();
 
-app.use(express.json());
 app.use(
   cors({
     origin: "*",
   }),
 );
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // 👈 Put your exact React URL here (DO NOT USE '*')
+//     credentials: true,
+//   }),
+// );
+app.use(express.json());
+app.use(cookieParser());
 
+// // Swagger
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", routerIndex);
 
 // Health check

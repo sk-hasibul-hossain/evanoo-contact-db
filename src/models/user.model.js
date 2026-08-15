@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const contactUsSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -11,26 +11,31 @@ const contactUsSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
       lowercase: true,
       trim: true,
     },
 
-    subject: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
     phone: {
       type: String,
-      require: true,
+      trim: true,
     },
 
-    message: {
+    password: {
       type: String,
       required: true,
-      trim: true,
-      minlength: 10,
+      // select: false,
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin", "superadmin"],
+      default: "user",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -38,4 +43,4 @@ const contactUsSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("ContactUs", contactUsSchema);
+export default mongoose.model("User", userSchema);
