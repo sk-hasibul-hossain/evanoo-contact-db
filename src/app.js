@@ -14,18 +14,18 @@ env.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-  }),
-);
 // app.use(
 //   cors({
-//     origin: /^http:\/\/localhost:\d+$/, // 👈 Put your exact React URL here (DO NOT USE '*')
+//     origin: "*",
 //     credentials: true,
 //   }),
 // );
+app.use(
+  cors({
+    origin: "https://contacts-admin.evanoo.in", // 👈 Put your exact React URL here (DO NOT USE '*')
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
