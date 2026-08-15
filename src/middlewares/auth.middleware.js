@@ -1,9 +1,10 @@
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import User from "../models/user.model.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies.token;
+    console.log("token: ", token);
     if (!token) {
       return res.status(401).json({
         success: false,
