@@ -2,6 +2,7 @@ import Contact from "../models/contact.model.js";
 import {
   getAllContactsService,
   deleteContactService,
+  getExportContactsService,
 } from "../services/contact.service.js";
 export const createContact = async (req, res) => {
   try {
@@ -24,6 +25,21 @@ export const getAllContactsController = async (req, res) => {
     const contacts = await getAllContactsService(req.query);
 
     return res.status(200).json(contacts);
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+export const getExportContactsController = async (req, res) => {
+  try {
+    const contacts = await getExportContactsService(req.query);
+
+    return res.status(200).json({
+      message: "Export contacts successfully",
+      data: contacts,
+    });
   } catch (error) {
     return res.status(error.statusCode || 500).json({
       message: error.message || "Internal Server Error",

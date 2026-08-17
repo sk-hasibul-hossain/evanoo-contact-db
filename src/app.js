@@ -25,7 +25,7 @@ app.use(
     origin: [
       "https://contacts-admin.evanoo.in",
       "https://evanoo.in",
-      "http://localhost:5174",
+      "http://localhost:5173",
     ], // 👈 Put your exact React URL here (DO NOT USE '*')
     credentials: true,
   }),

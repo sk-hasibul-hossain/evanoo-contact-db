@@ -45,22 +45,25 @@ export const getUsersService = async (query) => {
 
   const sortField = allowedSortFields.includes(orderBy) ? orderBy : "createdAt";
 
-  const pipeline = [];
-
-  // Search
-  if (search) {
-    pipeline.push({
-      $match: {
+  const searchFilter = search
+    ? {
         $or: [
           { name: { $regex: search, $options: "i" } },
           { email: { $regex: search, $options: "i" } },
           { phone: { $regex: search, $options: "i" } },
         ],
-      },
-    });
-  }
+      }
+    : {};
+  const DEFAULT_USER = process.env.DEFAULT_USER;
+  const filter = {
+    ...searchFilter,
+    email: { $ne: DEFAULT_USER },
+  };
 
-  pipeline.push(
+  const pipeline = [
+    {
+      $match: filter,
+    },
     {
       $sort: {
         [sortField]: order === "asc" ? 1 : -1,
@@ -74,26 +77,14 @@ export const getUsersService = async (query) => {
     },
     {
       $project: {
-        password: 0, // Never return password
+        password: 0,
       },
     },
-  );
+  ];
 
   const users = await User.aggregate(pipeline);
 
-  const total = await User.countDocuments(
-    search
-      ? {
-          $or: [
-            { firstName: { $regex: search, $options: "i" } },
-            { lastName: { $regex: search, $options: "i" } },
-            { email: { $regex: search, $options: "i" } },
-            { userId: { $regex: search, $options: "i" } },
-            { phoneNumber: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {},
-  );
+  const total = await User.countDocuments(filter);
 
   return {
     data: users,

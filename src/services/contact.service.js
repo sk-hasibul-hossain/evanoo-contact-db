@@ -1,4 +1,5 @@
 import Contact from "../models/contact.model.js";
+import { generateFileName } from "../helper/contact.helper.js";
 
 export const getAllContactsService = async (query) => {
   const {
@@ -8,6 +9,9 @@ export const getAllContactsService = async (query) => {
     orderBy = "createdAt",
     order = "asc",
   } = query;
+
+  const currentPage = Math.max(1, Number(page) || 1);
+  const pageLimit = Math.min(100, Math.max(1, Number(limit) || 10));
 
   const allowedSortFields = [
     "createdAt",
@@ -19,66 +23,51 @@ export const getAllContactsService = async (query) => {
 
   const sortField = allowedSortFields.includes(orderBy) ? orderBy : "createdAt";
 
-  const pipeline = [];
+  const sortOrder = order === "desc" ? -1 : 1;
 
-  // Search
-  if (search?.trim()) {
-    const searchRegex = {
-      $regex: search.trim(),
-      $options: "i",
-    };
+  const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    pipeline.push({
-      $match: {
-        $or: [
-          { fullName: searchRegex },
-          { email: searchRegex },
-          { subject: searchRegex },
-          { message: searchRegex },
-          { phone: searchRegex },
-        ],
-      },
-    });
-  }
+  const searchText = search?.trim() ? escapeRegex(search.trim()) : null;
 
-  pipeline.push(
-    {
-      $sort: {
-        [sortField]: order === "asc" ? 1 : -1,
-      },
-    },
-    {
-      $skip: (Number(page) - 1) * Number(limit),
-    },
-    {
-      $limit: Number(limit),
-    },
-  );
-
-  const contacts = await Contact.aggregate(pipeline);
-
-  // Total contacts
-  const totalQuery = search?.trim()
+  const matchQuery = searchText
     ? {
         $or: [
-          { fullName: { $regex: search.trim(), $options: "i" } },
-          { email: { $regex: search.trim(), $options: "i" } },
-          { subject: { $regex: search.trim(), $options: "i" } },
-          { message: { $regex: search.trim(), $options: "i" } },
-          { phone: { $regex: search.trim(), $options: "i" } },
+          { fullName: { $regex: searchText, $options: "i" } },
+          { email: { $regex: searchText, $options: "i" } },
+          { subject: { $regex: searchText, $options: "i" } },
+          { message: { $regex: searchText, $options: "i" } },
+          { phone: { $regex: searchText, $options: "i" } },
         ],
       }
     : {};
 
-  const total = await Contact.countDocuments(totalQuery);
+  const pipeline = [
+    ...(searchText ? [{ $match: matchQuery }] : []),
+    {
+      $sort: {
+        [sortField]: sortOrder,
+      },
+    },
+    {
+      $skip: (currentPage - 1) * pageLimit,
+    },
+    {
+      $limit: pageLimit,
+    },
+  ];
+
+  const [contacts, total] = await Promise.all([
+    Contact.aggregate(pipeline),
+    Contact.countDocuments(matchQuery),
+  ]);
 
   return {
     data: contacts,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page: currentPage,
+      limit: pageLimit,
       total,
-      totalPages: Math.ceil(total / Number(limit)),
+      totalPages: Math.ceil(total / pageLimit),
     },
   };
 };
@@ -96,5 +85,59 @@ export const deleteContactService = async (contactId) => {
 
   return {
     message: "Contact deleted successfully",
+  };
+};
+
+export const getExportContactsService = async (query) => {
+  const { fromDate, toDate, format } = query;
+
+  if (!fromDate || !toDate || !format) {
+    const error = new Error(
+      "Query params required fromDate=2026-06-30T18:30:00.000Z&toDate=2026-08-16T18:30:00.000Z&format=csv",
+    );
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const filter = {};
+
+  if (fromDate || toDate) {
+    filter.createdAt = {};
+
+    if (fromDate) {
+      const startDate = new Date(fromDate);
+
+      if (Number.isNaN(startDate.getTime())) {
+        throw new Error("Invalid fromDate");
+      }
+
+      filter.createdAt.$gte = startDate;
+    }
+
+    if (toDate) {
+      const endDate = new Date(toDate);
+
+      if (Number.isNaN(endDate.getTime())) {
+        throw new Error("Invalid toDate");
+      }
+
+      filter.createdAt.$lte = endDate;
+    }
+  }
+
+  const fileName = generateFileName({
+    fromDate,
+    toDate,
+    format,
+  });
+
+  const contacts = await Contact.find(filter).sort({ createdAt: -1 }).lean();
+
+  return {
+    contacts,
+    export: {
+      fileName,
+      format,
+    },
   };
 };
